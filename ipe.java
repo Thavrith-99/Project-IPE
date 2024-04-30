@@ -1,4 +1,3 @@
-package hi;
 import java.util.Scanner;
 public class ipe {
     public static void main(String[] args) {
