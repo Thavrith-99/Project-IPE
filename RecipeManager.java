@@ -1,115 +1,96 @@
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class RecipeManager extends Application {
+public class ReceiptProduct extends JFrame {
+    private JLabel logoLabel;
+    private JLabel productIdLabel;
+    private JLabel productNameLabel;
+    private JLabel quantityLabel;
+    private JLabel priceLabel;
+    private JLabel totalLabel;
 
-    private Map<String, List<String>> recipes = new HashMap<>();
-    private ObservableList<String> recipeNames = FXCollections.observableArrayList();
+    private JTextField productIdField;
+    private JTextField productNameField;
+    private JTextField quantityField;
+    private JTextField priceField;
+    private JTextField totalField;
 
-    private ListView<String> recipeListView;
-    private TextArea ingredientsTextArea;
+    private JButton addButton;
+    private JButton sendButton;
 
-    @Override
-    public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(10));
+    public ReceiptProduct() {
+        super("Product Receipt");
 
-        // Recipe List View
-        recipeListView = new ListView<>();
-        recipeListView.setItems(recipeNames);
-        recipeListView.setOnMouseClicked(event -> displayIngredients());
+        // Setting up components
+        logoLabel = new JLabel(new ImageIcon("shopping_logo.png"));
+        productIdLabel = new JLabel("Product ID:");
+        productNameLabel = new JLabel("Product Name:");
+        quantityLabel = new JLabel("Quantity:");
+        priceLabel = new JLabel("Price:");
+        totalLabel = new JLabel("Total:");
 
-        // Ingredients Text Area
-        ingredientsTextArea = new TextArea();
-        ingredientsTextArea.setEditable(false);
+        productIdField = new JTextField(10);
+        productNameField = new JTextField(10);
+        quantityField = new JTextField(10);
+        priceField = new JTextField(10);
+        totalField = new JTextField(10);
+        totalField.setEditable(false); // Making total field read-only
 
-        // Button to add recipe
-        Button addRecipeButton = new Button("Add Recipe");
-        addRecipeButton.setOnAction(event -> showAddRecipeDialog());
+        addButton = new JButton("Add");
+        sendButton = new JButton("Send");
 
-        // Button to remove recipe
-        Button removeRecipeButton = new Button("Remove Recipe");
-        removeRecipeButton.setOnAction(event -> removeSelectedRecipe());
+        // Setting up layout
+        setLayout(new GridLayout(7, 2));
+        add(logoLabel);
+        add(new JLabel()); // Placeholder for the logo
+        add(productIdLabel);
+        add(productIdField);
+        add(productNameLabel);
+        add(productNameField);
+        add(quantityLabel);
+        add(quantityField);
+        add(priceLabel);
+        add(priceField);
+        add(totalLabel);
+        add(totalField);
+        add(addButton);
+        add(sendButton);
 
-        // Top layout for buttons
-        HBox buttonBox = new HBox(10, addRecipeButton, removeRecipeButton);
-        buttonBox.setPadding(new Insets(10, 0, 0, 0));
-
-        root.setTop(buttonBox);
-        root.setLeft(recipeListView);
-        root.setCenter(ingredientsTextArea);
-
-        Scene scene = new Scene(root, 600, 400);
-        primaryStage.setTitle("Recipe Manager");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    private void displayIngredients() {
-        String selectedRecipe = recipeListView.getSelectionModel().getSelectedItem();
-        if (selectedRecipe != null) {
-            List<String> ingredients = recipes.get(selectedRecipe);
-            StringBuilder sb = new StringBuilder();
-            for (String ingredient : ingredients) {
-                sb.append(ingredient).append("\n");
+        // Adding action listeners
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add functionality to calculate and display total
+                int quantity = Integer.parseInt(quantityField.getText());
+                double price = Double.parseDouble(priceField.getText());
+                double total = quantity * price;
+                totalField.setText(String.valueOf(total));
             }
-            ingredientsTextArea.setText(sb.toString());
-        }
-    }
-
-    private void showAddRecipeDialog() {
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Add Recipe");
-        dialog.setHeaderText("Enter recipe name and ingredients:");
-
-        TextField recipeNameField = new TextField();
-        TextArea ingredientsArea = new TextArea();
-        ingredientsArea.setPromptText("Enter ingredients separated by commas");
-
-        dialog.getDialogPane().setContent(new VBox(10, recipeNameField, ingredientsArea));
-
-        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButton) {
-                String recipeName = recipeNameField.getText().trim();
-                String[] ingredients = ingredientsArea.getText().split(",");
-                List<String> ingredientList = new ArrayList<>();
-                for (String ingredient : ingredients) {
-                    ingredientList.add(ingredient.trim());
-                }
-                recipes.put(recipeName, ingredientList);
-                recipeNames.add(recipeName);
-                return recipeName;
-            }
-            return null;
         });
 
-        dialog.showAndWait();
-    }
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add functionality to send receipt (not implemented in this example)
+                JOptionPane.showMessageDialog(null, "Receipt sent!");
+            }
+        });
 
-    private void removeSelectedRecipe() {
-        String selectedRecipe = recipeListView.getSelectionModel().getSelectedItem();
-        if (selectedRecipe != null) {
-            recipes.remove(selectedRecipe);
-            recipeNames.remove(selectedRecipe);
-            ingredientsTextArea.clear();
-        }
+        // Setting frame properties
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+        setLocationRelativeTo(null); // Center the frame on screen
+        setVisible(true);
     }
 
     public static void main(String[] args) {
-        launch(args);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new ReceiptProduct();
+            }
+        });
     }
 }
